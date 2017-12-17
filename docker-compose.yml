@@ -3,7 +3,7 @@ version: '2'
 services:
   imaginarium:
     build: .
-    command: python imaginarium/server.py
+    command: python manage.py runserver
     volumes:
       - .:/opt/:rw
     networks:

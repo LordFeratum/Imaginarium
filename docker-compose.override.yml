@@ -18,10 +18,10 @@ services:
       - --collation-server=utf8_unicode_ci
       - --skip-character-set-client-handshake
     environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=unicorm
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=user
+      - MYSQL_ROOT_PASSWORD=imaginarium_pass
+      - MYSQL_DATABASE=imaginarium_db
+      - MYSQL_USER=imaginarium_user
+      - MYSQL_PASSWORD=imaginarium_pass
 
 networks:
   imaginarium-net: {}
