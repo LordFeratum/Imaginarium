@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+  imaginarium:
+    build: .
+    command: python imaginarium/server.py
+    volumes:
+      - .:/opt/:rw
+    networks:
+      - imaginarium-external
+
+networks:
+  imaginarium-external:
+    external: true

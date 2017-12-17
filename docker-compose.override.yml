@@ -1,0 +1,27 @@
+version: '2'
+
+services:
+  imaginarium:
+    depends_on:
+      - mysql
+    networks:
+      - imaginarium-net
+
+  mysql:
+    image: mysql:5.7
+    networks:
+      - imaginarium-net
+    ports:
+      - 3306:3306
+    command:
+      - --character-set-server=utf8
+      - --collation-server=utf8_unicode_ci
+      - --skip-character-set-client-handshake
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=unicorm
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=user
+
+networks:
+  imaginarium-net: {}

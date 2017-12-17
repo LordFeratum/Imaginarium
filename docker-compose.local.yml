@@ -1,0 +1,8 @@
+version: '2'
+
+services:
+  imaginarium:
+    env_file:
+      - local.env
+    ports:
+      - 8080:8080

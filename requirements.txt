@@ -1,0 +1,3 @@
+unicorm==0.0.2
+aiohttp==2.2.5
+aiohttp-cors==0.5.3
