@@ -1,20 +1,13 @@
-from aiomysql import create_pool
+from imaginarium.storage.utils import create_database_pool
 
 
 async def init_database(app=None, config=None):
     if not config:
         config = app['settings']
 
-    pool = await create_pool(
-        db=config['DATABASE_NAME'],
-        host=config['DATABASE_HOST'],
-        port=config['DATABASE_PORT'],
-        user=config['DATABASE_USER'],
-        password=config['DATABASE_PASS'],
-        loop=app.loop
-    )
-
+    pool = await create_database_pool(config, loop=app.loop)
     app['pool'] = pool
+
     return pool
 
 

@@ -5,12 +5,10 @@ from imaginarium.server import app
 
 def get_arguments():
     return [
-        {
-            'name': '--port',
-            'small_name': '-p',
-            'type': int,
-            'required': False
-        }
+        [
+            ('--port', '-p'),
+            dict(type=int, required=False)
+        ]
     ]
 
 
