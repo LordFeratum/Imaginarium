@@ -1,6 +1,11 @@
+from asyncio import get_event_loop
 from argparse import ArgumentParser
+from inspect import iscoroutinefunction
 
 from imaginarium.bin import COMMANDS
+
+
+loop = get_event_loop()
 
 
 def get_parser():
@@ -20,7 +25,15 @@ def get_parser():
     return parser
 
 
+async def run(func, args):
+    if iscoroutinefunction(func):
+        return await func(loop=loop, **args)
+
+    return func(**args)
+
+
 if __name__ == '__main__':
     parser = get_parser()
     arguments = parser.parse_args()
-    arguments.func(**vars(arguments))
+
+    loop.run_until_complete(run(arguments.func, vars(arguments)))

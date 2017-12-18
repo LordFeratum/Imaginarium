@@ -13,4 +13,7 @@ settings = {
     'DATABASE_PASS': eget('DATABASE_PASS'),
     'DATABASE_HOST': eget('DATABASE_HOST'),
     'DATABASE_PORT': int(eget('DATABASE_PORT')),
+
+    # MIGRATIONS
+    'MIGRATIONS_FOLDER': eget('MIGRATIONS_FOLDER'),
 }
