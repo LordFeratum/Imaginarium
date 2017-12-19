@@ -2,6 +2,7 @@ from uuid import uuid1
 from os import walk, path
 from importlib import import_module
 from functools import reduce
+from copy import deepcopy
 
 from imaginarium.settings import settings
 
@@ -53,13 +54,23 @@ async def _get_migrations_tree(loop):
         tree.setdefault('revisions', {})
         tree['revisions'][migration.revision] = {
             'down': migration.revision_down,
+            'up': None,
             'upgrade': migration.upgrade,
             'downgrade': migration.downgrade
         }
         return tree
 
+    def _loop_upside_tree(tree):
+        _tree = deepcopy(tree)
+        for current, info in _tree.get('revisions', {}).items():
+            current_down = info['down']
+            if current_down is not None:
+                _tree['revisions'][current_down]['up'] = current
+        return _tree
+
     tree = reduce(_format_tree, _get_migration_files(), {})
     tree['current'] = await _get_current_migration(loop)
+    tree = _loop_upside_tree(tree)
     return tree
 
 
@@ -121,14 +132,10 @@ async def _create(loop, message, migrations_tree):
     migration_file = _save_migration_file(migration_id,
                                           migrations_tree['current'],
                                           message)
-    await _update_migration_revision(loop,
-                                     migrations_tree['current'],
-                                     migration_id)
-
     print("Created migration file '{}'".format(migration_file))
 
 
-async def _apply(conn, migrations_tree):
+async def _apply(loop, migrations_tree):
     pass
 
 
@@ -160,5 +167,7 @@ def get_name():
 async def run(loop=None, **kwargs):
     await _create_migrate_table(loop)
     migrations_tree = await _get_migrations_tree(loop)
+    from pprint import pprint
+    pprint(migrations_tree)
     if 'create' in kwargs:
         await _create(loop, kwargs['message'], migrations_tree)

@@ -20,6 +20,6 @@ def get_name():
     return 'runserver'
 
 
-def run(**kwargs):
+async def run(loop=None, **kwargs):
     port = kwargs.get('port', app['settings']['IMAGINARIUM_PORT'])
-    web.run_app(app, port=port)
+    web.run_app(app, port=port, loop=loop)
