@@ -12,3 +12,7 @@ app['settings'] = settings
 
 app.on_startup.append(init_database)
 app.on_cleanup.append(close_database)
+
+
+if __name__ == '__main__':
+    web.run_app(app, port=settings['IMAGINARIUM_PORT'])

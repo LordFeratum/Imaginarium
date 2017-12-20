@@ -32,5 +32,4 @@ async def run(func, args):
 if __name__ == '__main__':
     parser = get_parser()
     arguments = parser.parse_args()
-
     loop.run_until_complete(run(arguments.func, vars(arguments)))

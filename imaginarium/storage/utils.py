@@ -69,3 +69,14 @@ async def fetchone(connection, sql, params=None, as_dict=False):
 
 async def fetchall(connection, sql, params=None, as_dict=False):
     return await fetch(connection, sql, params, False, as_dict)
+
+
+def insert_statement(tablename, attributes):
+    columns = ", ".join((attr for attr in attributes.keys()))
+    values = ", ".join((f"%({attr})s" for attr in attributes.keys()))
+    return f"INSERT INTO {tablename} ({columns}) VALUES ({values})"
+
+
+async def insert(conn, tablename, attributes):
+    sql = insert_statement(tablename, attributes)
+    return await execute(conn, sql, params=attributes)
