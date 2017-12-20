@@ -111,7 +111,12 @@ def _save_migration_file(migration_id, down_revision, message):
 
 async def _update_migration_revision(loop, current_revision, new_revision):
     async with create_database_connection(settings, loop=loop) as conn:
-        if current_revision is None:
+        if new_revision is None:
+            sql = """
+                TRUNCATE TABLE migrations
+            """
+
+        elif current_revision is None:
             sql = """
                 INSERT INTO migrations (migration_id)
                 VALUES ("{}");
@@ -123,7 +128,6 @@ async def _update_migration_revision(loop, current_revision, new_revision):
                     migration_id = "{}"
                 WHERE migration_id = "{}";
             """.format(new_revision, current_revision)
-
         await execute(conn, sql)
 
 
@@ -135,8 +139,79 @@ async def _create(loop, message, migrations_tree):
     print("Created migration file '{}'".format(migration_file))
 
 
-async def _apply(loop, migrations_tree):
-    pass
+def _upgrade_actions(migrations_tree, upgrade):
+    current = migrations_tree['current']
+    first = migrations_tree['first_revision']
+    migrations = migrations_tree['revisions']
+
+    action = 'upgrade'
+    up = 'up'
+    down = 'down'
+    iterations = upgrade
+    revision = first
+    if current is not None:
+        revision = migrations[current][up]
+
+    while iterations > 0:
+        if revision is None:
+            break
+
+        yield (
+            migrations[revision][down],
+            revision,
+            migrations[revision][action]
+        )
+        iterations -= 1
+        revision = migrations[revision][up]
+
+
+def _downgrade_actions(migrations_tree, downgrade):
+    current = migrations_tree['current']
+    first = migrations_tree['first_revision']
+    migrations = migrations_tree['revisions']
+
+    action = 'downgrade'
+    down = 'down'
+    iterations = downgrade
+    revision = current or first
+
+    while iterations > 0:
+        if revision is None:
+            break
+
+        yield (
+            revision,
+            migrations[revision][down],
+            migrations[revision][action]
+        )
+        iterations -= 1
+        revision = migrations[revision][down]
+
+
+async def _apply_revision(loop, current_revision, revision, action):
+    async with create_database_connection(settings, loop=loop) as conn:
+        await action(conn)
+
+    await _update_migration_revision(loop, current_revision, revision)
+
+
+async def _apply(loop, migrations_tree, upgrade=0, downgrade=0):
+    if upgrade == 0 and downgrade == 0:
+        print("You must specify an upgrade or a downgrade")
+        return
+
+    elif upgrade > 0 and downgrade > 0:
+        print("You only must provide an upgrade or a downgrade, not both")
+        return
+
+    if upgrade:
+        actions = _upgrade_actions(migrations_tree, upgrade)
+    else:
+        actions = _downgrade_actions(migrations_tree, downgrade)
+
+    for current_revision, revision, action in actions:
+        print("Applying revision {}".format(revision))
+        await _apply_revision(loop, current_revision, revision, action)
 
 
 def get_arguments():
@@ -146,12 +221,20 @@ def get_arguments():
             dict(default=False, action='store_true')
         ],
         [
-            ('--upgrade', '-u'),
+            ('--message', '-m'),
+            dict(type=str, default='')
+        ],
+        [
+            ('--apply', '-a'),
             dict(default=False, action='store_true')
         ],
         [
-            ('--message', '-m'),
-            dict(type=str, default='')
+            ('--upgrade', ),
+            dict(default=0, type=int)
+        ],
+        [
+            ('--downgrade', ),
+            dict(default=0, type=int)
         ]
     ]
 
@@ -167,7 +250,11 @@ def get_name():
 async def run(loop=None, **kwargs):
     await _create_migrate_table(loop)
     migrations_tree = await _get_migrations_tree(loop)
-    from pprint import pprint
-    pprint(migrations_tree)
-    if 'create' in kwargs:
+    if kwargs['create']:
         await _create(loop, kwargs['message'], migrations_tree)
+
+    elif kwargs['apply']:
+        upgrade =  kwargs['upgrade']
+        downgrade = kwargs['downgrade']
+        await _apply(loop, migrations_tree,
+                     upgrade=upgrade, downgrade=downgrade)
