@@ -214,6 +214,24 @@ async def _apply(loop, migrations_tree, upgrade=0, downgrade=0):
         await _apply_revision(loop, current_revision, revision, action)
 
 
+def _current(migrations_tree):
+    print("Current applied revision: ", migrations_tree['current'])
+
+
+def _history(migrations_tree):
+    current = migrations_tree['current']
+    current_revision = migrations_tree['first_revision']
+    while current_revision is not None:
+        data = migrations_tree['revisions'][current_revision]
+        if current == current_revision:
+            print(current_revision, ' -> ', data['up'], ' [Current] ')
+
+        else:
+            print(current_revision, ' -> ', data['up'])
+
+        current_revision = data['up']
+
+
 def get_arguments():
     return [
         [
@@ -235,7 +253,15 @@ def get_arguments():
         [
             ('--downgrade', ),
             dict(default=0, type=int)
-        ]
+        ],
+        [
+            ('--current', ),
+            dict(default=False, action='store_true')
+        ],
+        [
+            ('--history', ),
+            dict(default=False, action='store_true')
+        ],
     ]
 
 
@@ -258,3 +284,9 @@ async def run(loop=None, **kwargs):
         downgrade = kwargs['downgrade']
         await _apply(loop, migrations_tree,
                      upgrade=upgrade, downgrade=downgrade)
+
+    elif kwargs['current']:
+        _current(migrations_tree)
+
+    elif kwargs['history']:
+        _history(migrations_tree)
