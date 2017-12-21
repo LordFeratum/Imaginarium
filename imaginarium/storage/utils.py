@@ -1,6 +1,9 @@
 from asyncio import get_event_loop
+from hashlib import sha256
 
 from aiomysql import connect, create_pool, DictCursor
+
+from imaginarium.settings import settings
 
 
 async def create_database_pool(config, loop=None):
@@ -71,6 +74,11 @@ async def fetchall(connection, sql, params=None, as_dict=False):
     return await fetch(connection, sql, params, False, as_dict)
 
 
+async def exists(connection, sql, params=None):
+    res = await execute(connection, sql, params=params)
+    return res['rowcount'] > 0
+
+
 def insert_statement(tablename, attributes):
     columns = ", ".join((attr for attr in attributes.keys()))
     values = ", ".join((f"%({attr})s" for attr in attributes.keys()))
@@ -80,3 +88,9 @@ def insert_statement(tablename, attributes):
 async def insert(conn, tablename, attributes):
     sql = insert_statement(tablename, attributes)
     return await execute(conn, sql, params=attributes)
+
+
+async def encode_password(password):
+    salt = settings['IMAGINARIUM_SALT']
+    salted_password = '{}{}'.format(password, salt)
+    return sha256(salted_password.encode('utf-8')).hexdigest()

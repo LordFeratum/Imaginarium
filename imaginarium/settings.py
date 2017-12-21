@@ -6,6 +6,8 @@ eget = environ.get
 settings = {
     # SERVER
     'IMAGINARIUM_PORT': int(eget('IMAGINARIUM_PORT')),
+    'IMAGINARIUM_SALT': eget('IMAGINARIUM_SALT'),
+    'IMAGINARIUM_DATETIME_FORMAT': eget('IMAGINARIUM_DATETIME_FORMAT'),
 
     # DATABASE
     'DATABASE_NAME': eget('DATABASE_NAME'),

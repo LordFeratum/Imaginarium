@@ -1,13 +1,32 @@
-from aiohttp.web import Response, json_response
+from aiohttp.web import json_response
+
+from imaginarium.storage.user.retrieve import (
+    get_user_by_company,
+    retrieve_users_by_company
+)
+
+from imaginarium.storage.user.insert import add_user
+
+from imaginarium.views.validation import validate, validate_json
+from imaginarium.views.user.validation import UserValidator
 
 
-async def get_users(request):
-    return json_response({'users': []})
+@validate(validator=UserValidator, required=['company_id'])
+async def get_users(request, cleaned_data):
+    company_id = cleaned_data['company_id']
+    users = await retrieve_users_by_company(request, company_id)
+    return json_response(users)
 
 
-async def get_user(request):
-    return json_response({'user': None})
+@validate(validator=UserValidator, required=['company_id', 'id'])
+async def get_user(request, cleaned_data):
+    company_id = cleaned_data['company_id']
+    user_id = cleaned_data['id']
+    user = await get_user_by_company(request, company_id, user_id)
+    return json_response(user)
 
 
-async def insert_user(request):
-    return Response(status=201)
+@validate_json(validator=UserValidator, required="__all__", exclude=['id'])
+async def insert_user(request, cleaned_data):
+    data = await add_user(request, cleaned_data)
+    return json_response({'id': data['lastrowid']}, status=201)
