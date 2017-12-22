@@ -8,7 +8,7 @@ from imaginarium.storage.user.retrieve import (
 from imaginarium.storage.user.insert import add_user
 
 from imaginarium.views.validation import validate, validate_json
-from imaginarium.views.user.validation import UserValidator
+from imaginarium.views.users.validation import UserValidator
 
 
 @validate(validator=UserValidator, required=['company_id'])
@@ -26,7 +26,7 @@ async def get_user(request, cleaned_data):
     return json_response(user)
 
 
-@validate_json(validator=UserValidator, required="__all__", exclude=['id'])
+@validate_json(validator=UserValidator, exclude=['id'])
 async def insert_user(request, cleaned_data):
     data = await add_user(request, cleaned_data)
     return json_response({'id': data['lastrowid']}, status=201)
