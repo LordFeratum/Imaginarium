@@ -1,5 +1,5 @@
 from imaginarium.views.validation import (
-    Validator, validate_password, validate_email
+    Validator, validate_email
 )
 
 
@@ -11,6 +11,6 @@ class UserValidator(Validator):
         'company_id': int,
         'enabled': bool,
         'email': validate_email,
-        'password': validate_password,
+        'password': str,
         'username': str
     }

@@ -2,7 +2,6 @@ from imaginarium.storage.company import tablename
 from imaginarium.storage.utils import (
     fetchone,
     fetchall,
-    exists,
     encode_password
 )
 
@@ -32,7 +31,7 @@ async def user_exists(request, username, password):
         'password': encode_password(password)
     }
     async with request.app['pool'].acquire() as conn:
-        return await exists(conn, sql, params=attrs)
+        return await fetchone(conn, sql, params=attrs)
 
 
 async def retrieve_users_by_company(request, company_id):
