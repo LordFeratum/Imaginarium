@@ -1,5 +1,6 @@
 from datetime import datetime
 from string import hexdigits
+from functools import wraps
 
 from imaginarium.settings import settings
 
@@ -42,6 +43,7 @@ class Validator:
 
 def validate_json(validator=Validator, required="__all__", exclude=None):
     def _wrapper(fnx):
+        @wraps(fnx)
         async def _inner(request, *args, **kwargs):
             data = await request.json()
             cleaned_data = validator.validate(data, required, exclude)
@@ -53,6 +55,7 @@ def validate_json(validator=Validator, required="__all__", exclude=None):
 
 def validate(validator=Validator, required="__all__", exclude=None):
     def _wrapper(fnx):
+        @wraps(fnx)
         async def _inner(request, *args, **kwargs):
             cleaned_data = validator.validate(
                 request.match_info, required, exclude
