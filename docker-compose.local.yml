@@ -2,7 +2,6 @@ version: '2'
 
 services:
   imaginarium:
-    command: python imaginarium/server.py
     env_file:
       - local.env
     ports:

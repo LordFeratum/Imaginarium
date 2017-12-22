@@ -3,6 +3,7 @@ version: '2'
 services:
   imaginarium:
     build: .
+    command: gunicorn imaginarium.server:app -c gunicorn_settings.py
     volumes:
       - .:/opt/:rw
     networks:

@@ -28,7 +28,7 @@ def _prettify(method, path, name, module, function):
     module = _gold(module)
     function = _blue(function)
 
-    print(f'{method}\t{path}\t{name}\t{module}.{function}')
+    print(f'{method}\t{path}\t{module}.{function}\t{name}')
 
 
 def get_arguments():
