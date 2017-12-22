@@ -26,4 +26,3 @@ def run(**kwargs):
         path = _green(resource.get_info().get('path', resource.get_info().get('formatter')))
         name = _red(resource._name)
         print('{}  {}'.format(path, name))
-
